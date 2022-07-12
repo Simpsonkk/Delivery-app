@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+<link href="style.css" rel="stylesheet"></head>
+<body>
+  <header class="header">
+    <nav class="header__nav row ms-5">
+      <a class="header__link link-warning col-auto" href="../shops_page/shops_page.html">Shop</a>
+      <a class="header__link header__link_active link-warning col-auto ms-4" href="">Shopping cart</a>
+    </nav>
+  </header>
+  <main>
+    <div class="shopping-cart row m-2">
+      <div class="shopping-cart__user-data row col-5">
+        <div class="shopping-cart__input-container input-group input-group-sm mb-3">
+          <span class="input-group-text" id="inputGroup-sizing-sm">Name:</span>
+          <input type="text" class="shopping-cart__input form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>
+        <div class="w-100"></div>
+        <div class="shopping-cart__input-container input-group input-group-sm mb-3">
+          <span class="input-group-text" id="inputGroup-sizing-sm">Email:</span>
+          <input type="text" class="shopping-cart__input form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>        
+        <div class="w-100"></div>
+        <div class="shopping-cart__input-container input-group input-group-sm mb-3">
+          <span class="input-group-text" id="inputGroup-sizing-sm">Phone:</span>
+          <input type="text" class="shopping-cart__input form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>
+        <div class="w-100"></div>
+        <div class="shopping-cart__input-container input-group input-group-sm mb-3">
+          <span class="input-group-text" id="inputGroup-sizing-sm">Address:</span>
+          <input type="text" class="shopping-cart__input form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>
+        </div>
+      <div id="selectedDishes" class="shopping-cart__selected-dishes row col-7 justify-content-center ms-2 pb-2"></div>
+      <div class="w-100"></div>
+      <div class="shopping-cart__total row offset-6 mt-4">
+        <p id="totalPrice" class="shopping-cart__total-price col-auto me-5"></p>
+        <button class="shopping-cart__submit btn btn-success btn-lg col-auto ms-5">Submit</button>
+      </div>
+    </div>
+  </main>
+<script defer src="src_assets_styles_style_scss-src_modules_catalogs_catalogs_js-src_modules_localstorageUtil_lo-1f55e5.js"></script><script defer src="pageTwo.js"></script></body>
+</html>
