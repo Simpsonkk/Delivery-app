@@ -1,4 +1,3 @@
-import { BURGER_QUEEN_CATALOG } from '../catalogs/catalogs.js';
 import { localStorageUtil } from '../localstorageUtil/localstorage_util';
 
 class Products {
@@ -8,12 +7,12 @@ class Products {
     event.target.setAttribute('disabled', 'disabled');
   }
 
-  render(shopName) {
+  render(products) {
     const productsStore = localStorageUtil.getProducts();
     let htmlCatalog = '';
     let activeTextButton = '';
-    shopName.forEach(({ id, name, price, img }) => {
-      if (productsStore.indexOf(id) === -1) {
+    products.forEach(({ productId, name, price, img }) => {
+      if (productsStore.indexOf(productId) === -1) {
         activeTextButton = 'Add to Cart';
       } else {
         activeTextButton = 'Added';
@@ -28,7 +27,7 @@ class Products {
         <p class="delivery-content__cost col-auto">${price} $</p>
         <div class="w-100"></div>
         <button type="button" class="delivery-content__buy-button col-6 btn 
-        btn-outline-success" data-id=${id} ${disabledButton}>${activeTextButton}</button>
+        btn-outline-success" data-id=${productId} ${disabledButton}>${activeTextButton}</button>
       </div>
       `;
     });
@@ -48,8 +47,35 @@ class Products {
       btn.addEventListener('click', productsPage.handleSetLocationStorage);
     });
   }
+
+  async getShops() {
+    const response = await fetch('http://localhost:7000/api/shops');
+    const shops = await response.json();
+    let btns = '';
+    shops.forEach(({ shop, shopId }) => {
+      btns += `
+         <div class="w-100"></div>
+          <button id="shopButton-${shopId}" type="button" class="delivery-content__shop-button btn btn-outline-warning col mb-2" data-id="${shopId}">${shop}</button>
+          `;
+    });
+    document.querySelector('.delivery-content__shops').innerHTML = btns;
+    const elements = document.querySelectorAll('button[id^="shopButton-"]');
+    elements.forEach((element) => {
+      const id = element.getAttribute('data-id');
+      element.addEventListener('click', () => {
+        this.getProducts(id);
+        localStorage.clear();
+        localStorage.setItem('shopId', JSON.stringify(id));
+      });
+    });
+  }
+
+  async getProducts(id) {
+    const response = await fetch(`http://localhost:7000/api/products/${id}`);
+    const products = await response.json();
+    this.render(products);
+  }
 }
 
 export const productsPage = new Products();
-localStorage.setItem('shopName', JSON.stringify('BURGER_QUEEN_CATALOG'));
-productsPage.render(BURGER_QUEEN_CATALOG);
+productsPage.getShops();

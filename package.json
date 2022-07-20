@@ -4,12 +4,11 @@
   "description": "",
   "main": "shops_page",
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run watch\"",
+    "start": "webpack-dev-server --mode development --open",
     "build": "webpack --mode production",
     "dev": "webpack --mode development",
-    "dev:watch": "webpack --mode development --watch",
-    "watch": "webpack-dev-server --mode development --open",
-    "server": "json-server -w server/db.json -p 3001"
+    "server": "nodemon ./server/index.js",
+    "watch": "webpack-dev-server --mode development --open"
   },
   "author": "Tsaturian Volodymyr",
   "license": "ISC",
@@ -24,6 +23,7 @@
     "html-webpack-plugin": "^5.5.0",
     "json-server": "^0.17.0",
     "mini-css-extract-plugin": "^2.6.0",
+    "nodemon": "^2.0.19",
     "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
     "style-loader": "^3.3.1",
@@ -32,6 +32,12 @@
     "webpack-dev-server": "^4.9.0"
   },
   "dependencies": {
-    "bootstrap": "^5.1.3"
+    "bootstrap": "^5.1.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.21.3"
   }
 }

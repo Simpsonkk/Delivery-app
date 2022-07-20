@@ -1,7 +1,6 @@
 import '/src/assets/styles/style.scss';
 import { localStorageUtil } from '../localstorageUtil/localstorage_util';
 import { counter } from '../counter/counter';
-import { catalogs } from '../catalogs/catalogs';
 import { sendOrder } from '../getOrder/getOrder';
 
 class ShoppingCartPage {
@@ -15,7 +14,7 @@ class ShoppingCartPage {
       .addEventListener('click', shoppingCartPage.setOrder);
   }
 
-  render(shopName) {
+  render(shopId) {
     const products = localStorageUtil.getProducts();
     let selectedDishesAndQuantity = {};
     for (var i = 0; i < products.length; i++) {
@@ -27,9 +26,9 @@ class ShoppingCartPage {
     }
     let htmlCatalog = '';
     let sumCatalog = 0;
-    shopName.forEach(({ id, name, price, img }) => {
-      const quantity = selectedDishesAndQuantity[id];
-      if (products.indexOf(id) !== -1) {
+    shopId.forEach(({ productId, name, price, img }) => {
+      const quantity = selectedDishesAndQuantity[productId];
+      if (products.indexOf(JSON.stringify(productId)) !== -1) {
         htmlCatalog += `
         <div class="delivery-content__dish row col-4 justify-content-center">
           <img class="delivery-content__img col-auto" src=${img}>
@@ -39,7 +38,7 @@ class ShoppingCartPage {
           <p class="delivery-content__currency col-auto p-0">$</p>
           <div class="w-100"></div>
           <button type="button" class="delivery-content__remove-button col-2 p-0 btn 
-          btn-outline-success" data-id=${id}>x</button>
+          btn-outline-success" data-id=${productId}>x</button>
           <div class="delivery-content__counter-wrapper col-6 ms-2">
             <div class="delivery-content__control" data-action="minus">-</div>
             <div id="counter" class="delivery-content__current" data-counter>${quantity}</div>
@@ -61,7 +60,7 @@ class ShoppingCartPage {
 
   removeDish(event) {
     localStorageUtil.removeAllProducts(event.target.getAttribute('data-id'));
-    shoppingCartPage.render(catalogs[JSON.parse(selectedShop)]);
+    shoppingCartPage.getProducts(JSON.parse(selectedShop));
   }
 
   sumTotal() {
@@ -81,13 +80,14 @@ class ShoppingCartPage {
       'totalPrice'
     ).innerHTML = `Total price: ${totalPrice} $`;
   }
-  setOrder() {
+  async setOrder() {
     let quantityOfDishes = [];
     const products = localStorageUtil.getProducts();
-    const shopName = localStorage.getItem('shopName');
-    const typeOfDish = catalogs[JSON.parse(shopName)]
-      .filter((el) => products.includes(el.id))
-      .map((el) => el.name);
+    const shopName = localStorage.getItem('shopId');
+    const response = await fetch(
+      `http://localhost:7000/api/products/${JSON.parse(shopName)}`
+    );
+    const list = await response.json();
     const totalPrice = document
       .getElementById('totalPrice')
       .innerHTML.split('Total price: ')
@@ -100,25 +100,42 @@ class ShoppingCartPage {
     btns.forEach((btn) => {
       quantityOfDishes.push(btn.textContent);
     });
-    const dishesNameAndQuantityOfDishes = typeOfDish.reduce((acc, el, i) => {
-      acc.push(el, quantityOfDishes[i]);
+    list.length = quantityOfDishes.length;
+
+    const dishesNameAndQuantity = list.reduce((acc, el, i) => {
+      acc.push(el.name, quantityOfDishes[i]);
       return acc;
     }, []);
+    const resp = await fetch('http://localhost:7000/api/shops');
+    const shops = await resp.json();
+    const selectedShopName = shops
+      .filter((el) => JSON.parse(shopName).includes(el.shopId))
+      .map((el) => el.shop);
     const order = {
-      shop: shopName.substring(1, shopName.length - 9),
-      dishesNameAndQuantityOfDishes: dishesNameAndQuantityOfDishes,
+      shop: selectedShopName.join(''),
+      dishesNameAndQuantity: dishesNameAndQuantity,
       totalPrice: totalPrice,
       userName: userName,
       userEmail: userEmail,
       userPhone: userPhone,
       userAddress: userAddress,
     };
+    console.log(order);
     localStorage.clear();
     document.getElementById('selectedDishes').innerHTML = '';
     document.getElementById('totalPrice').innerHTML = 'Total price: 0 $';
     sendOrder(order);
   }
+
+  async getProducts(id) {
+    const response = await fetch(`http://localhost:7000/api/products/${id}`);
+    const products = await response.json();
+    this.render(products);
+  }
 }
+
 export const shoppingCartPage = new ShoppingCartPage();
-const selectedShop = localStorage.getItem('shopName');
-shoppingCartPage.render(catalogs[JSON.parse(selectedShop)]);
+const selectedShop = localStorage.getItem('shopId');
+if (selectedShop) {
+  shoppingCartPage.getProducts(JSON.parse(selectedShop));
+}
