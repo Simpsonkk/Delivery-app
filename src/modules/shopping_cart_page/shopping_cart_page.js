@@ -1,7 +1,7 @@
 import '/src/assets/styles/style.scss';
 import { localStorageUtil } from '../localstorageUtil/localstorage_util';
 import { counter } from '../counter/counter';
-import { sendOrder } from '../getOrder/getOrder';
+import { sendOrder } from '../order/order';
 
 class ShoppingCartPage {
   initAddEventListeners() {
@@ -120,11 +120,11 @@ class ShoppingCartPage {
       userPhone: userPhone,
       userAddress: userAddress,
     };
-    console.log(order);
     localStorage.clear();
     document.getElementById('selectedDishes').innerHTML = '';
     document.getElementById('totalPrice').innerHTML = 'Total price: 0 $';
     sendOrder(order);
+    alert('Your order has been sent!');
   }
 
   async getProducts(id) {
