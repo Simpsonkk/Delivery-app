@@ -1,14 +1,15 @@
-import { localStorageUtil } from '../localstorageUtil/localstorage_util';
+import { productService } from '../../shared/productService';
+import { productsApiService } from './../../core/services/productsApiService';
 
 class Products {
   handleSetLocationStorage(event) {
-    localStorageUtil.putProducts(event.target.getAttribute('data-id'));
+    productService.putProducts(event.target.getAttribute('data-id'));
     event.target.innerHTML = 'Added';
     event.target.setAttribute('disabled', 'disabled');
   }
 
   render(products) {
-    const productsStore = localStorageUtil.getProducts();
+    const productsStore = productService.getProducts();
     let htmlCatalog = '';
     let activeTextButton = '';
     products.forEach(({ productId, name, price, img }) => {
@@ -42,38 +43,36 @@ class Products {
   }
 
   initAddEventListeners() {
-    let btns = document.querySelectorAll('.delivery-content__buy-button');
-    btns.forEach(function (btn) {
-      btn.addEventListener('click', productsPage.handleSetLocationStorage);
-    });
+    document
+      .querySelectorAll('.delivery-content__buy-button')
+      .forEach((buyProductBtn) => {
+        buyProductBtn.addEventListener(
+          'click',
+          productsPage.handleSetLocationStorage
+        );
+      });
   }
 
   async getShops() {
-    const response = await fetch('http://localhost:7000/api/shops');
-    const shops = await response.json();
-    let btns = '';
+    const shops = await productsApiService.getShopsNames();
+    let shopsBtns = '';
     shops.forEach(({ shop, shopId }) => {
-      btns += `
+      shopsBtns += `
          <div class="w-100"></div>
           <button id="shopButton-${shopId}" type="button" class="delivery-content__shop-button btn btn-outline-warning col mb-2" data-id="${shopId}">${shop}</button>
           `;
     });
-    document.querySelector('.delivery-content__shops').innerHTML = btns;
+    document.querySelector('.delivery-content__shops').innerHTML = shopsBtns;
     const elements = document.querySelectorAll('button[id^="shopButton-"]');
     elements.forEach((element) => {
       const id = element.getAttribute('data-id');
-      element.addEventListener('click', () => {
-        this.getProducts(id);
+      element.addEventListener('click', async () => {
+        let products = await productsApiService.getProducts(id);
+        this.render(products);
         localStorage.clear();
         localStorage.setItem('shopId', JSON.stringify(id));
       });
     });
-  }
-
-  async getProducts(id) {
-    const response = await fetch(`http://localhost:7000/api/products/${id}`);
-    const products = await response.json();
-    this.render(products);
   }
 }
 

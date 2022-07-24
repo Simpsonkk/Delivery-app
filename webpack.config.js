@@ -4,8 +4,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   entry: {
-    pageOne: './src/modules/shops_page/shops_page.js',
-    pageTwo: './src/modules/shopping_cart_page/shopping_cart_page.js',
+    pageOne: './src/app/areas/shopping-list/shopping-list.js',
+    pageTwo: './src/app/areas/shopping-cart/shopping-cart.js',
   },
   optimization: {
     splitChunks: {
@@ -29,13 +29,13 @@ module.exports = {
   plugins: [
     new HTMLPlugin({
       filename: 'shops_page.html',
-      template: './src/modules/shops_page/shops_page.html',
+      template: './src/app/areas/shopping-list/shopping-list.html',
       chunks: ['pageOne'],
       inject: "body"
     }),
     new HTMLPlugin({
       filename: 'shopping_cart_page.html',
-      template: './src/modules/shopping_cart_page/shopping_cart_page.html',
+      template: './src/app/areas/shopping-cart/shopping-cart.html',
       chunks: ['pageTwo'],
       inject: "body"
     }),

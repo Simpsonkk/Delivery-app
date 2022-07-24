@@ -20261,6 +20261,10 @@ a {
   width: 220px;
   height: 200px;
 }
+.delivery-content__img-intro {
+  width: 900px;
+  height: 300px;
+}
 .delivery-content__remove-button {
   position: absolute;
   right: 13px;

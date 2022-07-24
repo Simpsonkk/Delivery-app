@@ -1,5 +1,4 @@
-import { calcTotalPrice } from '../calcTotalPrice/calcTotalPrice';
-import { localStorageUtil } from '../localstorageUtil/localstorage_util';
+import { productService } from '../../shared/productService';
 
 class Counter {
   minusEl() {
@@ -14,8 +13,8 @@ class Counter {
             const idDish = item
               .querySelector('[data-id]')
               .getAttribute('data-id');
-            calcTotalPrice.calcTotalPrice();
-            localStorageUtil.removeProducts(idDish);
+            this.calcTotalPrice();
+            productService.removeProducts(idDish);
           }
         });
     });
@@ -30,10 +29,24 @@ class Counter {
           const counter = item.querySelector('[data-counter]');
           counter.innerText = ++counter.innerText;
           const id = item.querySelector('[data-id]').getAttribute('data-id');
-          calcTotalPrice.calcTotalPrice();
-          localStorageUtil.putProducts(id);
+          this.calcTotalPrice();
+          productService.putProducts(id);
         });
     });
+  }
+
+  calcTotalPrice() {
+    const selectedDishes = document.querySelectorAll('.delivery-content__dish');
+    let totalPrice = 0;
+    selectedDishes.forEach((dish) => {
+      const dishCost = dish.querySelector('.delivery-content__cost').innerHTML;
+      const dishPrice = dish.querySelector('[data-counter]').innerHTML;
+      const currentPrice = +dishCost * +dishPrice;
+      totalPrice += currentPrice;
+    });
+    document.getElementById(
+      'totalPrice'
+    ).innerHTML = `Total price: ${totalPrice} $`;
   }
 }
 

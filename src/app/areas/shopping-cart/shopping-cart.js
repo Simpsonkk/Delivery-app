@@ -1,33 +1,36 @@
 import '/src/assets/styles/style.scss';
-import { localStorageUtil } from '../localstorageUtil/localstorage_util';
-import { counter } from '../counter/counter';
-import { sendOrder } from '../order/order';
+import { counter } from './counter';
+import { productService } from '../../shared/productService';
+import { productsApiService } from './../../core/services/productsApiService';
 
 class ShoppingCartPage {
   initAddEventListeners() {
-    let btns = document.querySelectorAll('.delivery-content__remove-button');
-    btns.forEach(function (btn) {
-      btn.addEventListener('click', shoppingCartPage.removeDish);
-    });
+    document
+      .querySelectorAll('.delivery-content__remove-button')
+      .forEach((removeProductButton) => {
+        removeProductButton.addEventListener(
+          'click',
+          shoppingCartPage.removeDish
+        );
+      });
+
     document
       .getElementById('submit')
       .addEventListener('click', shoppingCartPage.setOrder);
   }
 
   render(shopId) {
-    const products = localStorageUtil.getProducts();
-    let selectedDishesAndQuantity = {};
-    for (var i = 0; i < products.length; i++) {
-      if (selectedDishesAndQuantity[products[i]]) {
-        selectedDishesAndQuantity[products[i]] += 1;
-      } else {
-        selectedDishesAndQuantity[products[i]] = 1;
-      }
-    }
+    const products = productService.getProducts();
+    let selectedProductsCount = {};
+    [...new Set(products)].forEach((product) => {
+      selectedProductsCount[product] = products.filter(
+        (x) => x === product
+      ).length;
+    });
     let htmlCatalog = '';
     let sumCatalog = 0;
     shopId.forEach(({ productId, name, price, img }) => {
-      const quantity = selectedDishesAndQuantity[productId];
+      const quantity = selectedProductsCount[productId];
       if (products.indexOf(JSON.stringify(productId)) !== -1) {
         htmlCatalog += `
         <div class="delivery-content__dish row col-4 justify-content-center">
@@ -58,9 +61,11 @@ class ShoppingCartPage {
     counter.minusEl();
   }
 
-  removeDish(event) {
-    localStorageUtil.removeAllProducts(event.target.getAttribute('data-id'));
-    shoppingCartPage.getProducts(JSON.parse(selectedShop));
+  async removeDish(event) {
+    productService.removeAllProducts(event.target.getAttribute('data-id'));
+    const shopName = localStorage.getItem('shopId');
+    const removesProducts = await productsApiService.getProducts(shopName);
+    shoppingCartPage.render(removesProducts);
   }
 
   sumTotal() {
@@ -81,13 +86,9 @@ class ShoppingCartPage {
     ).innerHTML = `Total price: ${totalPrice} $`;
   }
   async setOrder() {
-    let quantityOfDishes = [];
-    const products = localStorageUtil.getProducts();
+    let productsCount = [];
     const shopName = localStorage.getItem('shopId');
-    const response = await fetch(
-      `http://localhost:7000/api/products/${JSON.parse(shopName)}`
-    );
-    const list = await response.json();
+    const list = await productsApiService.getProducts(shopName);
     const totalPrice = document
       .getElementById('totalPrice')
       .innerHTML.split('Total price: ')
@@ -96,18 +97,16 @@ class ShoppingCartPage {
     const userEmail = document.getElementById('userEmail').value;
     const userPhone = document.getElementById('userPhone').value;
     const userAddress = document.getElementById('userAddress').value;
-    const btns = document.querySelectorAll('.delivery-content__current');
-    btns.forEach((btn) => {
-      quantityOfDishes.push(btn.textContent);
+    document.querySelectorAll('.delivery-content__current').forEach((btn) => {
+      productsCount.push(btn.textContent);
     });
-    list.length = quantityOfDishes.length;
+    list.length = productsCount.length;
 
     const dishesNameAndQuantity = list.reduce((acc, el, i) => {
-      acc.push(el.name, quantityOfDishes[i]);
+      acc.push(el.name, productsCount[i]);
       return acc;
     }, []);
-    const resp = await fetch('http://localhost:7000/api/shops');
-    const shops = await resp.json();
+    const shops = await productsApiService.getShopsNames();
     const selectedShopName = shops
       .filter((el) => JSON.parse(shopName).includes(el.shopId))
       .map((el) => el.shop);
@@ -123,19 +122,23 @@ class ShoppingCartPage {
     localStorage.clear();
     document.getElementById('selectedDishes').innerHTML = '';
     document.getElementById('totalPrice').innerHTML = 'Total price: 0 $';
-    sendOrder(order);
+    document
+      .querySelectorAll('.shopping-cart__input')
+      .forEach((userDatainput) => {
+        userDatainput.value = '';
+      });
+    await productsApiService.sendOrder(order);
     alert('Your order has been sent!');
   }
 
-  async getProducts(id) {
-    const response = await fetch(`http://localhost:7000/api/products/${id}`);
-    const products = await response.json();
-    this.render(products);
+  async productsInit() {
+    const selectedShop = localStorage.getItem('shopId');
+    if (selectedShop) {
+      const products = await productsApiService.getProducts(selectedShop);
+      this.render(products);
+    }
   }
 }
 
 export const shoppingCartPage = new ShoppingCartPage();
-const selectedShop = localStorage.getItem('shopId');
-if (selectedShop) {
-  shoppingCartPage.getProducts(JSON.parse(selectedShop));
-}
+shoppingCartPage.productsInit();

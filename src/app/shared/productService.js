@@ -1,4 +1,4 @@
-class LocalStorageUtil {
+class ProductService {
   constructor() {
     this.keyname = 'products';
   }
@@ -32,4 +32,4 @@ class LocalStorageUtil {
   }
 }
 
-export const localStorageUtil = new LocalStorageUtil();
+export const productService = new ProductService();
