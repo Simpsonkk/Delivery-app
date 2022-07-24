@@ -13,4 +13,4 @@ But this is not in the scope of these tasks.
 4.Install PostgreSQL, create a database in the pgAdmin application, import two tables, shops and Products. 
 The tables are in the data folder;
 
-5.Open two terminals in the first we write npm run start, in the second npm run server.
+5.Open two terminals in the first we write npm run dev and npm run start, in the second npm run server.
